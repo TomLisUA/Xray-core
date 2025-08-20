@@ -1,0 +1,30 @@
+name: Build ARMv7 static binary
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-armv7:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build static ARMv7 binary
+        run: |
+          docker run --rm --platform=linux/arm/v7 \
+            -v "$PWD":/app -w /app messense/musl-cross:armv7 \
+            sh -c 'CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 \
+                   CC=arm-linux-musleabihf-gcc \
+                   go build -ldflags="-s -w" -o tun-l3-armv7 tun-l3.go'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tun-l3-armv7
+          path: tun-l3-armv7

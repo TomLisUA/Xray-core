@@ -3,6 +3,7 @@ module github.com/goxray/tun
 go 1.24.3
 
 require (
+	github.com/gorilla/websocket v1.5.3
 	github.com/goxray/core v0.0.3
 	github.com/jackpal/gateway v1.1.1
 	github.com/lilendian0x00/xray-knife/v3 v3.20.55
@@ -21,7 +22,6 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/juju/ratelimit v1.0.2 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect

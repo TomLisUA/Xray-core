@@ -1,0 +1,25 @@
+//go:build minimal
+
+package main
+
+// Minimal build configuration
+// This file is used when building with -tags minimal
+// It excludes unused protocols and features to reduce binary size
+
+import (
+	// Only include essential XRay protocols
+	_ "github.com/xtls/xray-core/proxy/vless/inbound"
+	_ "github.com/xtls/xray-core/proxy/vless/outbound"
+	_ "github.com/xtls/xray-core/proxy/freedom"
+	_ "github.com/xtls/xray-core/proxy/socks/inbound"
+
+	// Only include essential transports
+	_ "github.com/xtls/xray-core/transport/internet/tls"
+	_ "github.com/xtls/xray-core/transport/internet/websocket"
+	_ "github.com/xtls/xray-core/transport/internet/tcp"
+
+	// Essential features only
+	_ "github.com/xtls/xray-core/app/dispatcher"
+	_ "github.com/xtls/xray-core/app/proxyman/inbound"
+	_ "github.com/xtls/xray-core/app/proxyman/outbound"
+)
