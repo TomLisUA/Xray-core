@@ -4,31 +4,31 @@ set -e
 
 echo "Building tun-optimized for Huawei E3372H..."
 
-# E3372H specific optimizations
-export CGO_ENABLED=1
-export GOOS=linux
-export GOARCH=arm
-export GOARM=7
+# Use buildx for proper ARM cross-compilation
+docker buildx build --platform linux/arm/v7 -t tun-builder . -f - <<EOF
+FROM --platform=linux/arm/v7 golang:1.21-alpine
+RUN apk add --no-cache gcc musl-dev
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=7 \
+    go build -ldflags="-s -w -extldflags=-static" \
+    -gcflags="-l=4" -o tun-e3372h tun-optimized.go
+EOF
 
-# Aggressive size optimization for 41MB RAM device
-LDFLAGS="-s -w -extldflags '-static'"
-GCFLAGS="-l=4"  # Aggressive inlining
-
-go build -ldflags="$LDFLAGS" -gcflags="$GCFLAGS" -o tun-e3372h tun-optimized.go
-
-# Strip additional symbols
-strip --strip-all tun-e3372h 2>/dev/null || true
+# Extract binary from container
+docker create --name temp-container tun-builder
+docker cp temp-container:/app/tun-e3372h ./tun-e3372h
+docker rm temp-container
 
 SIZE=$(du -h tun-e3372h | cut -f1)
-echo "E3372H optimized binary: tun-e3372h ($SIZE)"
+echo "E3372H ARMv7 binary: tun-e3372h ($SIZE)"
 
 echo ""
-echo "🎯 E3372H Optimizations:"
-echo "  ✅ OOM killer protection (-1000)"
-echo "  ✅ High process priority (-20)"
-echo "  ✅ Small buffers (2KB vs 64KB)"
-echo "  ✅ Limited connections (8 vs 32)"
-echo "  ✅ Single CPU core (GOMAXPROCS=1)"
+echo "🎯 E3372H Ready:"
+echo "  ✅ ARMv7 static binary"
 echo "  ✅ Embedded tun.ko module"
+echo "  ✅ Memory optimized for 41MB RAM"
 echo ""
-echo "Deploy: scp tun-e3372h root@192.168.24.1:/tmp/"
+echo "Deploy to E3372H:"
+echo "  scp tun-e3372h root@192.168.24.1:/tmp/"
+echo "  ssh root@192.168.24.1 '/tmp/tun-e3372h vps.domain.com:443'"
